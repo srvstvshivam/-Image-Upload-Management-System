@@ -1,85 +1,83 @@
-import express from 'express';
-import path from 'path';
-import mongoose from 'mongoose';
-import multer from 'multer'
+import express from "express";
+import path from "path";
+import mongoose from "mongoose";
+import multer from "multer";
+import dotenv from "dotenv";
+import { v2 as cloudinary } from "cloudinary";
+
+dotenv.config();
 
 const app = express();
-import { v2 as cloudinary } from 'cloudinary';
+
+// Cloudinary Config (from .env)
 cloudinary.config({
-    cloud_name: 'dzwbk29is',
-    api_key: '433275784131842',
-    api_secret: 'KN-sXMmQTAhvhxkCPnBjcUXIYlQ'
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET_KEY,
 });
 
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.set("view engine", "ejs");
 
-app.use(express.urlencoded({extended:true}));
+// MongoDB Connection (from .env)
+mongoose
+  .connect(process.env.MONGO_URI, {
+    dbName: process.env.DB_NAME,
+  })
+  .then(() => {
+    console.log("✅ Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB Connection Error:", err);
+  });
 
-mongoose.connect("mongodb+srv://Shivam:shivam12@cluster.fg12tqg.mongodb.net/", {
-    dbname: "NodeJS_Mastery_course",
-  }).then(() => {
-    console.log("Connected to MongoDB");
-  }).catch((err)=>{
-    console.log(err);
+// Routes
+app.get("/", (req, res) => {
+  res.render("index.ejs", { url: null });
 });
 
-
-app.get("/",(req,res)=>{
-    res.render("index.ejs",{url: null});
-})
-
-
+// Multer Storage Config
 const storage = multer.diskStorage({
-    destination:"./public/uploads",
-    filename:function(req,file,cb){
+  destination: "./public/uploads",
+  filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + path.extname(file.originalname);
-    cb(null,file.fieldname + '-' + uniqueSuffix);
-    }
+    cb(null, file.fieldname + "-" + uniqueSuffix);
+  },
 });
-const upload = multer({storage:storage});
+const upload = multer({ storage: storage });
 
+// Mongoose Schema for Uploaded Images
 const imageSchema = new mongoose.Schema({
-    filename:String,
-    public_id:String,
-    imgUrl:String
-})
-const File = mongoose.model("cloudianry",imageSchema);
+  filename: String,
+  public_id: String,
+  imgUrl: String,
+});
+const File = mongoose.model("cloudinary_files", imageSchema);
 
-app.post("/upload",upload.single("image"),async (req,res)=>{
-    try{
-        const result = await cloudinary.uploader.upload(req.file.path);
-        console.log(result);
-// saving the file in mongodb
-        const db = await File.create({
-            filename:req.file.filename,
-            public_id:result.public_id,
-            imgUrl:result.secure_url
-        })
+// Upload Route
+app.post("/upload", upload.single("image"), async (req, res) => {
+  try {
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path);
+    console.log("✅ Uploaded:", result);
 
-        res.render("index.ejs",{url:result.secure_url});
-    }catch(err){
-        console.log(err);
-        res.send("Something went wrong");
-    }   
-})
+    // Save file record in MongoDB
+    await File.create({
+      filename: req.file.filename,
+      public_id: result.public_id,
+      imgUrl: result.secure_url,
+    });
 
+    res.render("index.ejs", { url: result.secure_url });
+  } catch (err) {
+    console.error("❌ Upload Error:", err);
+    res.send("Something went wrong");
+  }
+});
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const port = 3000;
-app.listen(port,()=>{
-    console.log (`sever is running on http://localhost:${port}`);
-})
+// Server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
