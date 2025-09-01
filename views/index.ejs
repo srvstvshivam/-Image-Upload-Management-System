@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Uploader Project</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      overflow: hidden;
+    }
+
+    .class-container {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 40px;
+      border-radius: 20px;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      transform: perspective(1000px) rotateY(5deg);
+      transition: transform 0.4s ease-in-out;
+    }
+
+    .class-container:hover {
+      transform: perspective(1000px) rotateY(0deg) scale(1.05);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #fff;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      border-radius: 10px;
+      background: #fff;
+      border: none;
+      margin-bottom: 20px;
+      cursor: pointer;
+      width: 100%;
+      transition: 0.3s;
+    }
+
+    input[type="file"]:hover {
+      background: #f0f0f0;
+    }
+
+    button {
+      padding: 12px 25px;
+      background: linear-gradient(135deg, #ff512f, #dd2476);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease-in-out;
+    }
+
+    button:hover {
+      background: linear-gradient(135deg, #dd2476, #ff512f);
+      transform: scale(1.1) rotate(-2deg);
+      box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    #uploaded-image-container {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      transform: perspective(1000px) rotateX(5deg);
+      transition: transform 0.4s;
+      text-align: center;
+    }
+
+    #uploaded-image-container:hover {
+      transform: perspective(1000px) rotateX(0deg) scale(1.05);
+    }
+
+    #uploaded-image-container h2 {
+      color: #fff;
+      margin-bottom: 15px;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    #uploaded-image-container img {
+      max-width: 300px;
+      border-radius: 15px;
+      box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+      transition: transform 0.4s ease-in-out;
+    }
+
+    #uploaded-image-container img:hover {
+      transform: scale(1.1) rotateY(10deg);
+    }
+  </style>
+</head>
+<body>
+  <div class="class-container">
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      <h1>Image Uploader</h1>
+      <input type="file" name="image" id="image" required>
+      <button type="submit">Upload Image</button>
+    </form>
+  </div>
+
+  <div id="uploaded-image-container">
+    <% if (url) { %>
+      <h2>Image Uploaded Successfully :</h2>
+      <img src="<%= url %>" alt="Uploaded Image">
+    <% } %>
+  </div>
+</body>
+</html>
